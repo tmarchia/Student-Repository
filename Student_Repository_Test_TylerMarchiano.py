@@ -7,16 +7,16 @@ This file contains different test methods for the Students, Instructors, and Uni
 '''
 
 import unittest
-from HW9_TylerMarchiano import Student, Instructor, University
+from Student_Repository_TylerMarchiano import Student, Instructor, University
 from HW8_TylerMarchiano import file_reader
 from typing import Dict, List
 
 class StudentTest(unittest.TestCase):
     def test_student(self):
         '''testing the student class'''
-        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Week 9/students.txt'
+        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Student-Repository/students.txt'
         
-        students_file: List[str] = list(file_reader(directory, 3, sep='\t'))
+        students_file: List[str] = list(file_reader(directory, 3, sep=';', header=True))
         students_dict: Dict[str, Student] = dict()
         for cwid, name, major in students_file:
             students_dict[cwid] = Student(cwid, name, major)
@@ -41,9 +41,9 @@ class StudentTest(unittest.TestCase):
 class InstructorTest(unittest.TestCase):
     def test_Instructor(self):
         '''testing the instructor class'''
-        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Week 9/instructors.txt'
+        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Student-Repository/instructors.txt'
         
-        instructors_file: List[str] = list(file_reader(directory, 3, sep='\t'))
+        instructors_file: List[str] = list(file_reader(directory, 3, sep='|', header=True))
         instructors_dict: Dict[str, Instructor] = dict()
         for cwid, name, department in instructors_file:
             instructors_dict[cwid] = Instructor(cwid, name, department)
@@ -68,7 +68,7 @@ class InstructorTest(unittest.TestCase):
 class UniversityTest(unittest.TestCase):
     def test_university(self):
         '''testing the university class'''
-        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Week 9' 
+        directory: str = '/Users/tylermarchiano/Documents/Stevens/SSW 810/Student-Repository' 
         university_test: University = University(directory)
         
         num_students: int = 10

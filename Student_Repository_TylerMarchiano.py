@@ -22,6 +22,28 @@ class Student:
     def add_course(self, course: str, grade: str) -> None:
         '''add the course to the dictionary with a value of grade'''
         self.courses[course] = grade
+    
+    def compute_completed_courses(self) -> List[str]:
+        '''make a list of the completed courses'''
+        passing_grades: List[str] = ["A", "A-", "B+", "B", "B-", "C+", "C"]
+        completed_courses: List[str] = list()
+        for course, grade in self.courses.items():
+            if grade in passing_grades:
+                completed_courses.append(course)
+        
+        return completed_courses
+    
+    def calculate_gpa(self) -> float:
+        '''calculate the students GPA '''
+        grade_values: Dict[str, float] = {"A": 4.0, "A-": 3.75, "B+": 3.25, "B": 3.0, "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
+        num_courses: float = 0.0
+        total_value: int = 0
+        
+        for course, grade in self.courses.items():
+            total_value += grade_values[grade]
+            num_courses +=1
+    
+        return round(total_value/num_courses,2)
 
 class Instructor:
     def __init__(self, cwid: str, name: str, department: str) -> None:
@@ -55,7 +77,7 @@ class University:
         '''read the students.txt file, creating a new Student for each line in the file'''
         file_path: str = path.join(self.path, 'students.txt')
         try:
-            students_file: List[str] = list(file_reader(file_path, 3, sep='\t'))
+            students_file: List[str] = list(file_reader(file_path, 3, sep=';', header=True))
         except:
             raise FileNotFoundError(f"Can't find students.txt in the given directory")
         
@@ -66,7 +88,7 @@ class University:
         '''read the instructors.txt file, creating a new Student for each line in the file'''
         file_path: str = path.join(self.path, 'instructors.txt')
         try:
-            instructors_file: List[str] = list(file_reader(file_path, 3, sep='\t'))
+            instructors_file: List[str] = list(file_reader(file_path, 3, sep='|', header=True))
         except:
             raise FileNotFoundError(f"Can't find instructors.txt in the given directory")
         
@@ -78,7 +100,7 @@ class University:
         assigns students courses and grades. Assigns professors courses '''
         file_path: str = path.join(self.path, 'grades.txt')
         try:
-            grades_file: List[str] = list(file_reader(file_path, 4, sep='\t'))
+            grades_file: List[str] = list(file_reader(file_path, 4, sep='|', header=True))
         except:
             raise FileNotFoundError(f"Can't find grades.txt in the given directory")
         
@@ -91,9 +113,9 @@ class University:
     
     def student_prettytable(self) -> None:
         '''print the student pretty table'''
-        pt: PrettyTable = PrettyTable(field_names=["CWID", "Name", "Completed Courses"])
+        pt: PrettyTable = PrettyTable(field_names=["CWID", "Name", "Completed Courses", "GPA"])
         for student in self.students.values():
-            pt.add_row([student.cwid, student.name, sorted(list(student.courses.keys()))])
+            pt.add_row([student.cwid, student.name, sorted(student.compute_completed_courses()), student.calculate_gpa()])
         print("Student Summary: ")
         print(pt)
     
