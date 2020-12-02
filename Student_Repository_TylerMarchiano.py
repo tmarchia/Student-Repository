@@ -10,6 +10,7 @@ from os import path
 from HW8_TylerMarchiano import file_reader
 from collections import defaultdict
 from prettytable import PrettyTable
+import sqlite3
 
 class Student:
     def __init__(self, cwid: str, name: str, major: str) -> None:
@@ -117,12 +118,13 @@ class University:
         self.majors_prettytable()
         self.student_prettytable()
         self.instructor_prettytable()
+        self.student_grades_table_db('/Users/tylermarchiano/Documents/Stevens/SSW810/Student-Repository/tmarchiano_homework.db')
     
     def read_students(self) -> None:
         '''read the students.txt file, creating a new Student for each line in the file'''
         file_path: str = path.join(self.path, 'students.txt')
         try:
-            students_file: List[str] = list(file_reader(file_path, 3, sep=';', header=True))
+            students_file: List[str] = list(file_reader(file_path, 3, sep='\t', header=True))
         except:
             raise FileNotFoundError(f"Can't find students.txt in the given directory")
         
@@ -133,7 +135,7 @@ class University:
         '''read the instructors.txt file, creating a new Student for each line in the file'''
         file_path: str = path.join(self.path, 'instructors.txt')
         try:
-            instructors_file: List[str] = list(file_reader(file_path, 3, sep='|', header=True))
+            instructors_file: List[str] = list(file_reader(file_path, 3, sep='\t', header=True))
         except:
             raise FileNotFoundError(f"Can't find instructors.txt in the given directory")
         
@@ -145,7 +147,7 @@ class University:
         assigns students courses and grades. Assigns professors courses '''
         file_path: str = path.join(self.path, 'grades.txt')
         try:
-            grades_file: List[str] = list(file_reader(file_path, 4, sep='|', header=True))
+            grades_file: List[str] = list(file_reader(file_path, 4, sep='\t', header=True))
         except:
             raise FileNotFoundError(f"Can't find grades.txt in the given directory")
         
@@ -205,9 +207,23 @@ class University:
         print()
         print("Instructor Summary: ")
         print(pt)
-        
-            
-            
+    
+    def student_grades_table_db(self, db_path) -> None:
+        '''print students grade summary table using SQLLite query'''
+        pt: PrettyTable = PrettyTable(field_names=["NAME", "CWID", "Course", "Grade", "Instructor"])
+        db: sqlite3.Connection = sqlite3.connect(db_path)
+        query: str = """select Students.Name, Students.CWID, Grades.Course, Grades.Grade, Instructors.Name
+                        from Grades join Students on Students.CWID = StudentCWID
+                        join Instructors on InstructorCWID = Instructors.CWID
+                        order by Students.Name ASC
+                    """
+        for row in db.execute(query):
+            pt.add_row(list(row))
+        db.close()
+        print()
+        print("Student Grade Summary: ")
+        print(pt)
+                   
 def main() -> None:
     '''run the program'''
     
@@ -218,6 +234,7 @@ def main() -> None:
         directory: str = input("Please enter the directory that contains the students.txt, instructors.txt and grades.txt file: ")
         university_summary: University = University(directory)
         
+        print()
         response: str = input("Would you like to read in from another directory (yes or no)?: ")
         
         if response.lower() == 'no':
